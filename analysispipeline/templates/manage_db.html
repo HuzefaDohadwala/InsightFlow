@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Database</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+        }
+        .form-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        select, button {
+            margin: 10px 0;
+            padding: 5px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <form id="manage-form" method="post">
+            <select name="month" required>
+                <option value="">Select Month</option>
+                <option value="January">January</option>
+                <option value="February">February</option>
+                <option value="March">March</option>
+                <option value="April">April</option>
+                <!-- ... (add all months) ... -->
+                <option value="December">December</option>
+            </select>
+            <select name="year" required>
+                <option value="">Select Year</option>
+                <!-- Add years dynamically using JavaScript or server-side -->
+            </select>
+            <select name="category" required>
+                <option value="">Select Category</option>
+                <option value="Technical issue">Technical issue</option>
+                <option value="Good user experience">Good user experience</option>
+                <option value="Bad user experience">Bad user experience</option>
+                <option value="Good customer service">Good customer service</option>
+                <option value="Bad customer service">Bad customer service</option>
+                <option value="Other">Other</option>
+            </select>
+            <select name="product" required>
+                <option value="">Select Product</option>
+                <option value="payzapp">payzapp</option>
+                <!-- Add product options dynamically from your database -->
+            </select>
+            <button type="submit" name="action" value="delete">Delete</button>
+            <button type="submit" name="action" value="display">Display</button>
+        </form>
+    </div>
+    {% if message %}
+    <div class="message">
+        {{ message }}
+    </div>
+    {% endif %}
+    {% if reviews %}
+    <table>
+        <thead>
+            <tr>
+                <th>Review</th>
+                <th>Month</th>
+                <th>Year</th>
+                <th>Score</th>
+                <th>Category</th>
+                <th>Product</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for review in reviews %}
+            <tr>
+                <td>{{ review.review }}</td>
+                <td>{{ review.review_month }}</td>
+                <td>{{ review.review_year }}</td>
+                <td>{{ review.score }}</td>
+                <td>{{ review.review_category }}</td>
+                <td>{{ review.product_name }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+    <script>
+        // Populate year dropdown
+        const yearSelect = document.querySelector('select[name="year"]');
+        const currentYear = new Date().getFullYear();
+        for (let year = currentYear; year >= currentYear - 10; year--) {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            yearSelect.appendChild(option);
+        }
+    </script>
+</body>
+</html>

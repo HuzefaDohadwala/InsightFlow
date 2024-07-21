@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Analysis Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .header {
+            padding: 10px;
+            display: flex;
+        }
+        .chat-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        .user-message {
+            background-color: #e1f5fe;
+            align-self: flex-end;
+        }
+        .assistant-message {
+            background-color: #f1f1f1;
+        }
+        .input-container {
+            display: flex;
+            padding: 10px;
+            background-color: #f1f1f1;
+        }
+        .input-container input {
+            flex-grow: 1;
+            padding: 10px;
+            margin-right: 10px;
+        }
+        .input-container button {
+            padding: 10px 20px;
+        }
+        .download-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        {% if pdf_path %}
+        <a href="{{ url_for('download_report') }}" class="download-btn">Download Analysis Report</a>
+        {% endif %}
+    </div>
+
+    <div class="chat-container">
+        {% if not summary %}
+        <div class="message assistant-message">
+            <h2>Welcome! Please select the analysis parameters:</h2>
+            <form method="post">
+                <label for="month">Month:</label>
+                <select id="month" name="month" required>
+                    <option value="" disabled selected>Select month</option>
+                    <option value="January">January</option>
+                    <option value="February">February</option>
+                    <option value="March">March</option>
+                    <option value="April">April</option>
+                    <option value="May">May</option>
+                    <option value="June">June</option>
+                    <option value="July">July</option>
+                    <option value="August">August</option>
+                    <option value="September">September</option>
+                    <option value="October">October</option>
+                    <option value="November">November</option>
+                    <option value="December">December</option>
+                </select>
+                
+                <label for="year">Year:</label>
+                <select id="year" name="year" required>
+                    <option value="" disabled selected>Select year</option>
+                    <option value="2023">2023</option>
+                    <option value="2024">2024</option>
+                </select>
+
+                <label for="category">Category:</label>
+                <select id="category" name="category" required>
+                    <option value="" disabled selected>Select category</option>
+                    <option value="Technical issue">Technical issue</option>
+                    <option value="Good user experience">Good user experience</option>
+                    <option value="Bad user experience">Bad user experience</option>
+                    <option value="Good customer service">Good customer service</option>
+                    <option value="Bad customer service">Bad customer service</option>
+                    <option value="Other">Other</option>
+                </select>
+                 
+                <label for="product">Product:</label>
+                <select id="product" name="product" required>
+                    <option value="" disabled selected>Select category</option>
+                    <option value="payzapp">payzapp</option>
+                </select>
+
+                <button type="submit" name="analyze">Analyze</button>
+            </form>
+        </div>
+        {% endif %}
+        
+        {% if summary %}
+        <div class="message assistant-message">
+            <h2>Analysis Summary:</h2>
+            <pre>{{ summary | replace("**", "<strong>") | replace("**", "</strong>") | safe }}</pre>
+        </div>
+        {% endif %}
+        
+        {% if history %}
+        {% for item in history %}
+        <div class="message user-message">
+            <strong>Q:</strong> 
+            {{ item.split('\nA:')[0][3:] | replace("**", "<strong>") | replace("**", "</strong>") | safe }}
+        </div>
+        <div class="message assistant-message">
+            <strong>A:</strong> 
+            <pre>{{ item.split('\nA:')[1] | replace("**", "<strong>") | replace("**", "</strong>") | safe }}</pre>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+
+    {% if summary %}
+    <div class="input-container">
+        <form method="post" style="display: flex; width: 100%;">
+            <input type="text" id="question" name="question" placeholder="Ask a question about the analysis..." required>
+            <button type="submit" name="ask">Ask</button>
+        </form>
+    </div>
+    {% endif %}
+</body>
+</html>
