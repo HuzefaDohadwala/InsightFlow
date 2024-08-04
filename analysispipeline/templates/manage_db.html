@@ -6,13 +6,40 @@
     <title>Manage Database</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: #f0f4f8;
+            color: #333;
+        }
+        .header {
+            background-color: #3949ab;
+            color: white;
             padding: 20px;
-            background-color: #f5f5f5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .content {
+            flex-grow: 1;
+            padding: 20px;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            box-sizing: border-box;
         }
         h1 {
-            color: #333;
+            color: white;
+            font-size: 24px;
+            margin: 0;
+        }
+        h2 {
+            color: #e4272d;
+            font-size: 20px;
+            margin-top: 0;
         }
         .form-container {
             background-color: white;
@@ -23,107 +50,138 @@
         }
         select, button {
             margin: 10px 0;
-            padding: 5px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
         }
         button {
-            background-color: #4CAF50;
+            background-color: #e4272d;
             color: white;
             border: none;
             padding: 10px 20px;
             cursor: pointer;
-            border-radius: 5px;
+            transition: background-color 0.3s ease;
         }
         button:hover {
-            background-color: #45a049;
+            background-color: #c81e24;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+            background-color: white;
         }
         th, td {
             border: 1px solid #ddd;
-            padding: 8px;
+            padding: 12px;
             text-align: left;
         }
         th {
             background-color: #f2f2f2;
+            font-weight: bold;
         }
         .message {
             margin-top: 20px;
-            padding: 10px;
+            padding: 15px;
             border-radius: 5px;
             background-color: #d4edda;
             color: #155724;
             border: 1px solid #c3e6cb;
         }
+        .upload-button {
+            background-color: #e4272d;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+        .upload-button:hover {
+            background-color: #c81e24;
+        }
     </style>
 </head>
 <body>
-    <div class="form-container">
-        <form id="manage-form" method="post">
-            <select name="month" required>
-                <option value="">Select Month</option>
-                <option value="January">January</option>
-                <option value="February">February</option>
-                <option value="March">March</option>
-                <option value="April">April</option>
-                <!-- ... (add all months) ... -->
-                <option value="December">December</option>
-            </select>
-            <select name="year" required>
-                <option value="">Select Year</option>
-                <!-- Add years dynamically using JavaScript or server-side -->
-            </select>
-            <select name="category" required>
-                <option value="">Select Category</option>
-                <option value="Technical issue">Technical issue</option>
-                <option value="Good user experience">Good user experience</option>
-                <option value="Bad user experience">Bad user experience</option>
-                <option value="Good customer service">Good customer service</option>
-                <option value="Bad customer service">Bad customer service</option>
-                <option value="Other">Other</option>
-            </select>
-            <select name="product" required>
-                <option value="">Select Product</option>
-                <option value="payzapp">payzapp</option>
-                <!-- Add product options dynamically from your database -->
-            </select>
-            <button type="submit" name="action" value="delete">Delete</button>
-            <button type="submit" name="action" value="display">Display</button>
-        </form>
+    <div class="header">
+        <h1>Manage Database</h1>
+        <a href="{{ url_for('upload') }}" class="upload-button">Upload Data</a>
     </div>
-    {% if message %}
-    <div class="message">
-        {{ message }}
+    <div class="content">
+        <div class="form-container">
+            <form id="manage-form" method="post">
+                <select name="month" required>
+                    <option value="" disabled selected>Select Month</option>
+                    <option value="January">January</option>
+                    <option value="February">February</option>
+                    <option value="March">March</option>
+                    <option value="April">April</option>
+                    <option value="May">May</option>
+                    <option value="June">June</option>
+                    <option value="July">July</option>
+                    <option value="August">August</option>
+                    <option value="September">September</option>
+                    <option value="October">October</option>
+                    <option value="November">November</option>
+                    <option value="December">December</option>
+                </select>
+                <select name="year" required>
+                    <option value="">Select Year</option>
+                    <!-- Add years dynamically using JavaScript or server-side -->
+                </select>
+                <select name="category" required>
+                    <option value="">Select Category</option>
+                    <option value="Technical issue">Technical issue</option>
+                    <option value="Good user experience">Good user experience</option>
+                    <option value="Bad user experience">Bad user experience</option>
+                    <option value="Good customer service">Good customer service</option>
+                    <option value="Bad customer service">Bad customer service</option>
+                    <option value="Other">Other</option>
+                </select>
+                <select id="product" name="product" required>
+                    <option value="" disabled selected>Select product</option>
+                    {% for product in products %}
+                    <option value="{{ product }}">{{ product }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" name="action" value="delete">Delete</button>
+                <button type="submit" name="action" value="display">Display</button>
+            </form>
+        </div>
+        {% if message %}
+        <div class="message">
+            {{ message }}
+        </div>
+        {% endif %}
+        {% if reviews %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Review</th>
+                    <th>Month</th>
+                    <th>Year</th>
+                    <th>Score</th>
+                    <th>Category</th>
+                    <th>Product</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for review in reviews %}
+                <tr>
+                    <td>{{ review.review }}</td>
+                    <td>{{ review.review_month }}</td>
+                    <td>{{ review.review_year }}</td>
+                    <td>{{ review.score }}</td>
+                    <td>{{ review.review_category }}</td>
+                    <td>{{ review.product_name }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
     </div>
-    {% endif %}
-    {% if reviews %}
-    <table>
-        <thead>
-            <tr>
-                <th>Review</th>
-                <th>Month</th>
-                <th>Year</th>
-                <th>Score</th>
-                <th>Category</th>
-                <th>Product</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for review in reviews %}
-            <tr>
-                <td>{{ review.review }}</td>
-                <td>{{ review.review_month }}</td>
-                <td>{{ review.review_year }}</td>
-                <td>{{ review.score }}</td>
-                <td>{{ review.review_category }}</td>
-                <td>{{ review.product_name }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% endif %}
     <script>
         // Populate year dropdown
         const yearSelect = document.querySelector('select[name="year"]');

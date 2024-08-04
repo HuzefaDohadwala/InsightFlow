@@ -4,150 +4,178 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Analysis Chat</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
-        .header {
-            padding: 10px;
-            display: flex;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
         }
         .chat-container {
-            flex-grow: 1;
+            height: calc(100vh - 160px);
             overflow-y: auto;
-            padding: 20px;
         }
         .message {
-            margin-bottom: 15px;
-            padding: 10px;
-            border-radius: 5px;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
+            transition: all 0.3s ease;
+            border-radius: 12px;
+        }
+        .message:hover {
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
         }
         .user-message {
-            background-color: #e1f5fe;
-            align-self: flex-end;
+            background-color: #fce8e8;
+            border-left: 4px solid #e4272d;
         }
         .assistant-message {
-            background-color: #f1f1f1;
-        }
-        .input-container {
-            display: flex;
-            padding: 10px;
-            background-color: #f1f1f1;
+            background-color: #e8eaf6;
+            border-left: 4px solid #3949ab;
         }
         .input-container input {
-            flex-grow: 1;
-            padding: 10px;
-            margin-right: 10px;
+            transition: all 0.3s ease;
         }
-        .input-container button {
-            padding: 10px 20px;
+        .input-container input:focus {
+            box-shadow: 0 0 0 3px rgba(228, 39, 45, 0.3);
         }
         .download-btn {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            text-decoration: none;
-            border-radius: 5px;
+            transition: all 0.3s ease;
+            background-color: #e4272d;
         }
-        pre {
-            white-space: pre-wrap;
-            word-wrap: break-word;
+        .download-btn:hover {
+            background-color: #c81e24;
+        }
+        .header-gradient {
+            background-color: #3949ab;
+        }
+        select, input[type="text"] {
+            background-color: white;
+            color: #333;
+        }
+        select:focus, input[type="text"]:focus {
+            border-color: #3949ab;
+            box-shadow: 0 0 0 3px rgba(57, 73, 171, 0.3);
+        }
+        button[type="submit"] {
+            background-color: #e4272d;
+        }
+        button[type="submit"]:hover {
+            background-color: #c81e24;
         }
     </style>
 </head>
-<body>
-    <div class="header">
-        {% if pdf_path %}
-        <a href="{{ url_for('download_report') }}" class="download-btn">Download Analysis Report</a>
-        {% endif %}
-    </div>
+<body class="flex flex-col min-h-screen">
+    <header class="header-gradient text-white shadow-lg p-6">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-3xl font-bold">Data Analysis Chat</h1>
+            {% if pdf_path %}
+            <a href="{{ url_for('download_report') }}" class="download-btn text-white font-bold py-2 px-6 rounded-full shadow-md hover:shadow-lg">
+                Download Analysis Report
+            </a>
+            {% endif %}
+        </div>
+    </header>
 
-    <div class="chat-container">
-        {% if not summary %}
-        <div class="message assistant-message">
-            <h2>Welcome! Please select the analysis parameters:</h2>
-            <form method="post">
-                <label for="month">Month:</label>
-                <select id="month" name="month" required>
-                    <option value="" disabled selected>Select month</option>
-                    <option value="January">January</option>
-                    <option value="February">February</option>
-                    <option value="March">March</option>
-                    <option value="April">April</option>
-                    <option value="May">May</option>
-                    <option value="June">June</option>
-                    <option value="July">July</option>
-                    <option value="August">August</option>
-                    <option value="September">September</option>
-                    <option value="October">October</option>
-                    <option value="November">November</option>
-                    <option value="December">December</option>
-                </select>
-                
-                <label for="year">Year:</label>
-                <select id="year" name="year" required>
-                    <option value="" disabled selected>Select year</option>
-                    <option value="2023">2023</option>
-                    <option value="2024">2024</option>
-                </select>
-
-                <label for="category">Category:</label>
-                <select id="category" name="category" required>
-                    <option value="" disabled selected>Select category</option>
-                    <option value="Technical issue">Technical issue</option>
-                    <option value="Good user experience">Good user experience</option>
-                    <option value="Bad user experience">Bad user experience</option>
-                    <option value="Good customer service">Good customer service</option>
-                    <option value="Bad customer service">Bad customer service</option>
-                    <option value="Other">Other</option>
-                </select>
-                 
-                <label for="product">Product:</label>
-                <select id="product" name="product" required>
-                    <option value="" disabled selected>Select category</option>
-                    <option value="payzapp">payzapp</option>
-                </select>
-
-                <button type="submit" name="analyze">Analyze</button>
+    <main class="flex-grow container mx-auto p-2">
+        <div class="chat-container pr-4">
+            {% if not summary %}
+            <div class="message assistant-message p-6 rounded-lg shadow-md mb-6">
+                <h2 class="text-2xl font-bold mb-4 text-3949ab">Welcome! Please select the analysis parameters:</h2>
+                <form method="post" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <select id="month" name="month" required class="w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-2 focus:ring-3949ab focus:border-3949ab sm:text-sm rounded-md shadow-sm">
+                                <option value="" disabled selected>Select Month</option>
+                                <option value="January">January</option>
+                                <option value="February">February</option>
+                                <option value="March">March</option>
+                                <option value="April">April</option>
+                                <option value="May">May</option>
+                                <option value="June">June</option>
+                                <option value="July">July</option>
+                                <option value="August">August</option>
+                                <option value="September">September</option>
+                                <option value="October">October</option>
+                                <option value="November">November</option>
+                                <option value="December">December</option>
+                            </select>
+                        </div>
+                        <div>
+                            <select id="year" name="year" required class="w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-2 focus:ring-3949ab focus:border-3949ab sm:text-sm rounded-md shadow-sm">
+                                <option value="" disabled selected>Select Year</option>
+                                <!-- Years will be populated dynamically using JavaScript -->
+                            </select>
+                        </div>
+                        <div>
+                            <select id="category" name="category" required class="w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-2 focus:ring-3949ab focus:border-3949ab sm:text-sm rounded-md shadow-sm">
+                                <option value="" disabled selected>Select Category</option>
+                                <option value="Technical issue">Technical issue</option>
+                                <option value="Good user experience">Good user experience</option>
+                                <option value="Bad user experience">Bad user experience</option>
+                                <option value="Good customer service">Good customer service</option>
+                                <option value="Bad customer service">Bad customer service</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <select id="product" name="product" required class="w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-2 focus:ring-3949ab focus:border-3949ab sm:text-sm rounded-md shadow-sm">
+                                <option value="" disabled selected>Select Product</option>
+                                {% for product in products %}
+                                <option value="{{ product }}">{{ product }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <button type="submit" name="analyze" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-e4272d hover:bg-c81e24 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-e4272d transition duration-150 ease-in-out">
+                            Analyze
+                        </button>
+                    </div>
+                </form>
+            </div>
+            {% endif %}
+            
+            {% if summary %}
+            <div class="message assistant-message p-6 rounded-lg shadow-md mb-6">
+                <h2 class="text-2xl font-bold mb-4 text-3949ab">Analysis Summary:</h2>
+                <pre class="whitespace-pre-wrap text-sm">{{ summary | replace("**", "<strong>") | replace("**", "</strong>") | safe }}</pre>
+            </div>
+            {% endif %}
+            
+            {% if history %}
+            <div class="space-y-6">
+                {% for item in history %}
+                <div class="message user-message p-5 rounded-lg shadow-md">
+                    <strong class="block text-lg mb-2 text-e4272d">Prompt</strong> 
+                    <p class="text-sm">{{ item.split('\nA:')[0][3:] | replace("**", "<strong>") | replace("**", "</strong>") | safe }}</p>
+                </div>
+                <div class="message assistant-message p-5 rounded-lg shadow-md">
+                    <strong class="block text-lg mb-2 text-3949ab">Response</strong> 
+                    <pre class="whitespace-pre-wrap text-sm">{{ item.split('\nA:')[1] | replace("**", "<strong>") | replace("**", "</strong>") | safe }}</pre>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}                
+        </div>
+        {% if summary %}
+        <div class="container mx-auto">
+            <form method="post" class="flex">
+                <input type="text" id="question" name="question" placeholder="Ask a question about the analysis..." required class="flex-grow p-3 rounded-l-full border-1 border-3949ab focus:outline-none focus:ring-2 focus:ring-3949ab focus:border-3949ab">
+                <button type="submit" name="ask" class="bg-e4272d text-white px-8 py-3 rounded-r-full hover:bg-c81e24 focus:outline-none focus:ring-2 focus:ring-e4272d focus:ring-offset-2 transition duration-150 ease-in-out">Ask</button>
             </form>
         </div>
-        {% endif %}
-        
-        {% if summary %}
-        <div class="message assistant-message">
-            <h2>Analysis Summary:</h2>
-            <pre>{{ summary | replace("**", "<strong>") | replace("**", "</strong>") | safe }}</pre>
-        </div>
-        {% endif %}
-        
-        {% if history %}
-        {% for item in history %}
-        <div class="message user-message">
-            <strong>Q:</strong> 
-            {{ item.split('\nA:')[0][3:] | replace("**", "<strong>") | replace("**", "</strong>") | safe }}
-        </div>
-        <div class="message assistant-message">
-            <strong>A:</strong> 
-            <pre>{{ item.split('\nA:')[1] | replace("**", "<strong>") | replace("**", "</strong>") | safe }}</pre>
-        </div>
-        {% endfor %}
-        {% endif %}
-    </div>
+        {% endif %} 
+    </main>
 
-    {% if summary %}
-    <div class="input-container">
-        <form method="post" style="display: flex; width: 100%;">
-            <input type="text" id="question" name="question" placeholder="Ask a question about the analysis..." required>
-            <button type="submit" name="ask">Ask</button>
-        </form>
-    </div>
-    {% endif %}
+    <script>
+        // Populate year dropdown
+        const yearSelect = document.querySelector('select[name="year"]');
+        const currentYear = new Date().getFullYear();
+        for (let year = currentYear; year >= currentYear - 10; year--) {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            yearSelect.appendChild(option);
+        }
+    </script>
 </body>
 </html>

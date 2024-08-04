@@ -6,28 +6,40 @@
     <title>Data Upload</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
-            background-color: #f5f5f5;
+            background-color: #f0f4f8;
+            color: #333;
         }
         .header {
+            background-color: #3949ab;
+            color: white;
             padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .content {
             flex-grow: 1;
             padding: 20px;
-            max-width: 800px;
+            width: 100%;
+            max-width: 1200px;
             margin: 0 auto;
-            background-color: white;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            border-radius: 5px;
+            box-sizing: border-box;
         }
         h1 {
-            color: #333;
+            color: white;
+            font-size: 24px;
+            margin: 0;
+        }
+        h2 {
+            color: #e4272d;
+            font-size: 20px;
+            margin-top: 0;
         }
         ul {
             padding-left: 20px;
@@ -42,15 +54,16 @@
             margin-bottom: 10px;
         }
         button {
-            background-color: #4CAF50;
+            background-color: #e4272d;
             color: white;
             padding: 10px 20px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
         button:hover {
-            background-color: #45a049;
+            background-color: #c81e24;
         }
         #progress {
             margin-top: 20px;
@@ -58,30 +71,44 @@
         progress {
             width: 100%;
             height: 20px;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        progress::-webkit-progress-bar {
+            background-color: #f0f4f8;
+            border-radius: 5px;
+        }
+        progress::-webkit-progress-value {
+            background-color: #3949ab;
+            border-radius: 5px;
+        }
+        progress::-moz-progress-bar {
+            background-color: #3949ab;
+            border-radius: 5px;
         }
         #message {
             margin-top: 20px;
             font-weight: bold;
+            color: #e4272d;
         }
         .manage-db-button {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background-color: #4CAF50;
+            background-color: #e4272d;
             color: white;
             padding: 10px 20px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             text-decoration: none;
+            transition: background-color 0.3s ease;
         }
         .manage-db-button:hover {
-            background-color: #45a049;
+            background-color: #c81e24;
         }
     </style>
 </head>
 <body>
     <div class="header">
+        <h1>Data Upload</h1>
         <a href="{{ url_for('manage_db') }}" class="manage-db-button">Manage DB</a>
     </div>
     <div class="content">
@@ -105,59 +132,58 @@
         <div id="message"></div>
     </div>
     <script>
-        // Replace the existing event source code with this:
-let evtSource;
+        let evtSource;
 
-document.getElementById('upload-form').onsubmit = function(event) {
-    event.preventDefault();
-    const formData = new FormData(this);
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', '/upload', true);
+        document.getElementById('upload-form').onsubmit = function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/upload', true);
 
-    xhr.onload = function() {
-        if (xhr.status === 200) {
-            const response = JSON.parse(xhr.responseText);
-            if (response.progress === 100) {
-                document.getElementById('progress-count').innerText = 'Upload complete!';
-                document.getElementById('progress-bar').value = 100;
-                document.getElementById('message').innerText = response.message;
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.progress === 100) {
+                        document.getElementById('progress-count').innerText = 'Upload complete!';
+                        document.getElementById('progress-bar').value = 100;
+                        document.getElementById('message').innerText = response.message;
+                        if (evtSource) {
+                            evtSource.close();
+                        }
+                    } else if (response.error) {
+                        document.getElementById('message').innerText = 'Error: ' + response.error;
+                        if (evtSource) {
+                            evtSource.close();
+                        }
+                    }
+                } else {
+                    document.getElementById('message').innerText = 'An error occurred while uploading the file.';
+                    if (evtSource) {
+                        evtSource.close();
+                    }
+                }
+            };
+
+            xhr.onerror = function() {
+                document.getElementById('message').innerText = 'A network error occurred. Please try again.';
                 if (evtSource) {
                     evtSource.close();
                 }
-            } else if (response.error) {
-                document.getElementById('message').innerText = 'Error: ' + response.error;
-                if (evtSource) {
-                    evtSource.close();
-                }
-            }
-        } else {
-            document.getElementById('message').innerText = 'An error occurred while uploading the file.';
+            };
+
+            xhr.send(formData);
+
+            // Start listening for progress updates
             if (evtSource) {
                 evtSource.close();
             }
-        }
-    };
-
-    xhr.onerror = function() {
-        document.getElementById('message').innerText = 'A network error occurred. Please try again.';
-        if (evtSource) {
-            evtSource.close();
-        }
-    };
-
-    xhr.send(formData);
-
-    // Start listening for progress updates
-    if (evtSource) {
-        evtSource.close();
-    }
-    evtSource = new EventSource("/progress");
-    evtSource.onmessage = function(event) {
-        const percentComplete = event.data;
-        document.getElementById('progress-count').innerText = percentComplete + '%';
-        document.getElementById('progress-bar').value = percentComplete;
-    };
-};
+            evtSource = new EventSource("/progress");
+            evtSource.onmessage = function(event) {
+                const percentComplete = event.data;
+                document.getElementById('progress-count').innerText = percentComplete + '%';
+                document.getElementById('progress-bar').value = percentComplete;
+            };
+        };
     </script>
 </body>
 </html>
